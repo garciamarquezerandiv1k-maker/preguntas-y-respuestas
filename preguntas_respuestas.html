@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reto del Conocimiento</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        button {
+            display: block;
+            margin: 12px auto;
+            padding: 14px;
+            width: 90%;
+            border: none;
+            border-radius: 10px;
+            background: #00c853;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+        button:hover {
+            background: #009624;
+            transform: scale(1.02);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .hidden {
+            display: none;
+        }
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .correct {
+            background-color: #2e7d32;
+        }
+        .incorrect {
+            background-color: #c62828;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Reto del Conocimiento</h1>
+    <p id="subtitulo">Responde correctamente y gana puntos</p>
+    
+    <div id="quiz"></div>
+    
+    <div id="feedback" class="alert hidden"></div>
+    
+    <h2 id="resultado" class="hidden"></h2>
+    <button id="btn-reiniciar" class="hidden" onclick="reiniciarQuiz()">Jugar de nuevo</button>
+</div>
+
+<script>
+    // Estructura de preguntas corregida y limpia
+    const preguntas = [
+        {
+            pregunta: "¿Qué es la inteligencia artificial?",
+            opciones: [
+                "Un tipo de robot físico",
+                "Una tecnología que permite a las máquinas aprender",
+                "Un programa de videojuegos",
+                "Un dispositivo electrónico"
+            ],
+            correcta: 1 // Índice de la opción correcta (la segunda)
+        },
+        {
+            pregunta: "¿Cuál es una característica de la IA?",
+            opciones: [
+                "No aprende",
+                "Solo funciona sin datos",
+                "Puede analizar información",
+                "No se usa en la vida real"
+            ],
+            correcta: 2 // Índice de la opción correcta (la tercera)
+        },
+        {
+            pregunta: "¿Dónde se usa la IA?",
+            opciones: [
+                "Solo en escuelas",
+                "En celulares, apps y empresas",
+                "Solo en videojuegos",
+                "No se usa actualmente"
+            ],
+            correcta: 1 // Índice de la opción correcta (la segunda)
+        }
+    ];
+
+    let actual = 0;
+    let puntos = 0;
+
+    function cargarPregunta() {
+        // Ocultar la alerta de retroalimentación de la pregunta anterior
+        document.getElementById("feedback").classList.add("hidden");
+
+        // Si ya respondimos todas las preguntas, mostramos el resultado
+        if (actual >= preguntas.length) {
+            mostrarResultado();
+            return;
+        }
+
+        let q = preguntas[actual];
+        let html = `<h2>${q.pregunta}</h2>`;
+        
+        // Generar botones para cada opción de respuesta
+        q.opciones.forEach((op, i) => {
+            html += `<button onclick="responder(${i})">${op}</button>`;
+        });
+
+        document.getElementById("quiz").innerHTML = html;
+    }
+
+    function responder(opcion) {
+        let feedbackDiv = document.getElementById("feedback");
+        feedbackDiv.classList.remove("hidden", "correct", "incorrect");
+
+        // Validar si la respuesta es correcta
+        if (opcion === preguntas[actual].correcta) {
+            puntos++;
+            feedbackDiv.textContent = "✓ ¡Correcto!";
+            feedbackDiv.classList.add("correct");
+        } else {
+            feedbackDiv.textContent = "✗ Incorrecto";
+            feedbackDiv.classList.add("incorrect");
+        }
+
+        // Deshabilitar botones momentáneamente para que no hagan doble clic
+        const botones = document.querySelectorAll("#quiz button");
+        botones.forEach(btn => btn.disabled = true);
+
+        // Esperar 1.5 segundos para mostrar si acertó antes de pasar a la siguiente pregunta
+        actual++;
+        setTimeout(cargarPregunta, 1500);
+    }
+
+    function mostrarResultado() {
+        // Ocultar elementos del juego activo
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("subtitulo").classList.add("hidden");
+        document.getElementById("feedback").classList.add("hidden");
+
+        let mensaje = "";
+        if (puntos === preguntas.length) {
+            mensaje = "¡Excelente, sacaste todo correcto! 🏆";
+        } else if (puntos >= 2) {
+            mensaje = "¡Buen trabajo! 👏";
+        } else {
+            mensaje = "Sigue practicando 📚";
+        }
+
+        // Mostrar pantalla de resultados
+        let resultado = document.getElementById("resultado");
+        resultado.classList.remove("hidden");
+        resultado.innerHTML = `Obtuviste ${puntos} de ${preguntas.length}<br><span style='font-size: 1.2rem; font-weight: normal;'>${mensaje}</span>`;
+        
+        // Mostrar botón para reiniciar
+        document.getElementById("btn-reiniciar").classList.remove("hidden");
+    }
+
+    function reiniciarQuiz() {
+        actual = 0;
+        puntos = 0;
+        document.getElementById("quiz").classList.remove("hidden");
+        document.getElementById("subtitulo").classList.remove("hidden");
+        document.getElementById("resultado").classList.add("hidden");
+        document.getElementById("btn-reiniciar").classList.add("hidden");
+        cargarPregunta();
+    }
+
+    // Iniciar el juego por primera vez al cargar la página
+    cargarPregunta();
+</script>
+
+</body>
+</html>
